@@ -56,8 +56,12 @@ def handbrake_mainfeature(srcpath, basepath, logfile, job):
     #    logfile
     #    )
 
+    filename = os.path.join(basepath, job.title + ".mkv")
+    filepathname = os.path.join(basepath, filename)
+    srcpath2 = os.path.join(srcpath, 'BDMV', 'PLAYLIST', track.playlist + ".mpls")
+
     cmd = 'nice mkvmerge {0} -o {1} >> {2} 2>&1'.format(
-        shlex.quote(srcpath),
+        shlex.quote(srcpath2),
         shlex.quote(filepathname),
         logfile
         )
