@@ -47,15 +47,21 @@ def handbrake_mainfeature(srcpath, basepath, logfile, job):
         hb_args = cfg['HB_ARGS_BD']
         hb_preset = cfg['HB_PRESET_BD']
 
-    cmd = 'nice {0} -i {1} -o {2} --main-feature --preset "{3}" {4} >> {5} 2>&1'.format(
-        cfg['HANDBRAKE_CLI'],
+    #cmd = 'nice {0} -i {1} -o {2} --main-feature --preset "{3}" {4} >> {5} 2>&1'.format(
+    #    cfg['HANDBRAKE_CLI'],
+    #    shlex.quote(srcpath),
+    #    shlex.quote(filepathname),
+    #    hb_preset,
+    #    hb_args,
+    #    logfile
+    #    )
+
+    cmd = 'nice mkvmerge {0} -o {1} >> {2} 2>&1'.format(
         shlex.quote(srcpath),
         shlex.quote(filepathname),
-        hb_preset,
-        hb_args,
         logfile
         )
-
+    
     logging.debug("Sending command: %s", (cmd))
 
     try:
@@ -63,13 +69,13 @@ def handbrake_mainfeature(srcpath, basepath, logfile, job):
             cmd,
             shell=True
         ).decode("utf-8")
-        logging.info("Handbrake call successful")
+        logging.info("Mkvmerge call successful")
     except subprocess.CalledProcessError as hb_error:
-        err = "Call to handbrake failed with code: " + str(hb_error.returncode) + "(" + str(hb_error.output) + ")"
+        err = "Call to mkvmerge failed with code: " + str(hb_error.returncode) + "(" + str(hb_error.output) + ")"
         logging.error(err)
         sys.exit(err)
 
-    logging.info("Handbrake processing complete")
+    logging.info("Mkvmerge processing complete")
     logging.debug(str(job))
 
     track.ripped = True
@@ -359,10 +365,10 @@ def get_track_info(srcpath, job):
         return(-1)
         # sys.exit(err)
 
-    def put_track(job, t_no, seconds, b, a, f, mainfeature):
+    def put_track(job, t_no, seconds, b, a, f, p, mainfeature):
 
         logging.debug("Track #" + str(t_no) + " Length: " + str(seconds) + " seconds Blocks: " + str(b) + " fps: "
-                      + str(f) + " aspect: " + str(a) + " Mainfeature: " + str(mainfeature))
+                      + str(f) + " aspect: " + str(a) + " playlist: " + str(p) + " Mainfeature: " + str(mainfeature))
 
         t = Track(
             job_id=job.job_id,
@@ -371,6 +377,7 @@ def get_track_info(srcpath, job):
             aspect_ratio=a,
             blocks=b,
             fps=f,
+            playlist=p,
             main_feature=mainfeature,
             basename=job.title,
             filename=job.title + ".mkv",
@@ -381,10 +388,12 @@ def get_track_info(srcpath, job):
 
     t_pattern = re.compile(r'.*\+ title *')
     pattern = re.compile(r'.*duration\:.*')
+    p_pattern = re.compile(r'.*playlist\:*')
     b_pattern = re.compile(r'.*blocks\).*')
     seconds = 0
     t_no = 0
     b = 0
+    p = 0
     f = 0
     a = 0
     result = ""
@@ -410,7 +419,7 @@ def get_track_info(srcpath, job):
             if t_no == 0:
                 pass
             else:
-                put_track(job, t_no, seconds, b, a, f, mainfeature)
+                put_track(job, t_no, seconds, b, a, f, p, mainfeature)
 
             mainfeature = False
             t_no = line.rsplit(' ', 1)[-1]
@@ -425,6 +434,11 @@ def get_track_info(srcpath, job):
         if(re.search("Main Feature", line)) is not None:
             mainfeature = True
 
+        if(re.search(p_pattern, line)) is not None:
+            p = line.split()
+            p1, p2 = p[2].split('.')
+            p = p1
+
         if(re.search(b_pattern, line)) is not None:
             b = line.rsplit(' ', 2)[-2]
             b = b.replace("(", "")
@@ -434,4 +448,4 @@ def get_track_info(srcpath, job):
             a = line.rsplit(' ', 3)[-3]
             a = str(a).replace(",", "")
 
-    put_track(job, t_no, seconds, b, a, f, mainfeature)
+    put_track(job, t_no, seconds, b, a, f, p, mainfeature)
