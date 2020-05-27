@@ -295,9 +295,8 @@ def get_track_info(srcpath, job):
             mainfeature = True
 
         if(re.search(p_pattern, line)) is not None:
-            p = line.split()
-            p1, p2 = p[1].split('.')
-            p = p1
+            p = line.rsplit('.')[-2]
+            p = p.split(' ')[-1]
 
         if(re.search(" fps", line)) is not None:
             fps = line.rsplit(' ', 2)[-2]
