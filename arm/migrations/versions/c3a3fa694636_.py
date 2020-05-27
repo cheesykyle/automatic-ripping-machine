@@ -121,6 +121,7 @@ def upgrade():
     sa.Column('length', sa.Integer(), nullable=True),
     sa.Column('aspect_ratio', sa.String(length=20), nullable=True),
     sa.Column('fps', sa.Float(), nullable=True),
+    sa.Column('fps', sa.String(length=5), nullable=True),
     sa.Column('main_feature', sa.Boolean(), nullable=True),
     sa.Column('basename', sa.String(length=256), nullable=True),
     sa.Column('filename', sa.String(length=256), nullable=True),

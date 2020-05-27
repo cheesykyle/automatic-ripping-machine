@@ -114,6 +114,7 @@ class Track(db.Model):
     aspect_ratio = db.Column(db.String(20))
     # blocks = db.Column(db.Integer)
     fps = db.Column(db.Float)
+    playlist = db.Column(db.String(5))
     main_feature = db.Column(db.Boolean)
     basename = db.Column(db.String(256))
     filename = db.Column(db.String(256))
@@ -124,7 +125,7 @@ class Track(db.Model):
     error = db.Column(db.Text)
     source = db.Column(db.String(32))
 
-    def __init__(self, job_id, track_number, length, aspect_ratio, fps, main_feature, source, basename, filename):
+    def __init__(self, job_id, track_number, length, aspect_ratio, fps, playlist, main_feature, source, basename, filename):
         """Return a track object"""
         self.job_id = job_id
         self.track_number = track_number
@@ -132,6 +133,7 @@ class Track(db.Model):
         self.aspect_ratio = aspect_ratio
         # self.blocks = blocks
         self.fps = fps
+        self.playlist = playlist
         self.main_feature = main_feature
         self.source = source
         self.basename = basename

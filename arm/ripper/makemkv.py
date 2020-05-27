@@ -251,7 +251,7 @@ def get_track_info(mdisc, job):
                     if line_track == int(0):
                         pass
                     else:
-                        utils.put_track(job, track, seconds, aspect, fps, False, "makemkv", filename)
+                        utils.put_track(job, track, seconds, aspect, fps, "00000", False, "makemkv", filename)
                     track = line_track
 
                 if msg[1] == "27":
@@ -270,4 +270,4 @@ def get_track_info(mdisc, job):
                     fps = fps.replace('"', '').strip()
                     fps = float(fps)
 
-    utils.put_track(job, track, seconds, aspect, fps, False, "makemkv", filename)
+    utils.put_track(job, track, seconds, aspect, fps, "00000", False, "makemkv", filename)

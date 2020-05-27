@@ -46,12 +46,20 @@ def handbrake_mainfeature(srcpath, basepath, logfile, job):
         hb_args = job.config.HB_ARGS_BD
         hb_preset = job.config.HB_PRESET_BD
 
-    cmd = 'nice {0} -i {1} -o {2} --main-feature --preset "{3}" {4} >> {5} 2>&1'.format(
-        job.config.HANDBRAKE_CLI,
-        shlex.quote(srcpath),
+    #cmd = 'nice {0} -i {1} -o {2} --main-feature --preset "{3}" {4} >> {5} 2>&1'.format(
+    #    job.config.HANDBRAKE_CLI,
+    #    shlex.quote(srcpath),
+    #    shlex.quote(filepathname),
+    #    hb_preset,
+    #    hb_args,
+    #    logfile
+    #    )
+
+    srcpath2 = os.path.join(srcpath, 'BDMV', 'PLAYLIST', track.playlist + ".mpls")
+
+    cmd = 'nice mkvmerge {0} -o {1} >> {2} 2>&1'.format(
+        shlex.quote(srcpath2),
         shlex.quote(filepathname),
-        hb_preset,
-        hb_args,
         logfile
         )
 
@@ -62,16 +70,16 @@ def handbrake_mainfeature(srcpath, basepath, logfile, job):
             cmd,
             shell=True
         ).decode("utf-8")
-        logging.info("Handbrake call successful")
+        logging.info("MKVMerge call successful")
         track.status = "success"
     except subprocess.CalledProcessError as hb_error:
-        err = "Call to handbrake failed with code: " + str(hb_error.returncode) + "(" + str(hb_error.output) + ")"
+        err = "Call to mkvmerge failed with code: " + str(hb_error.returncode) + "(" + str(hb_error.output) + ")"
         logging.error(err)
         track.status = "fail"
         track.error = err
         sys.exit(err)
 
-    logging.info("Handbrake processing complete")
+    logging.info("Mkvmerge processing complete")
     logging.debug(str(job))
 
     track.ripped = True
@@ -243,11 +251,13 @@ def get_track_info(srcpath, job):
 
     t_pattern = re.compile(r'.*\+ title *')
     pattern = re.compile(r'.*duration\:.*')
+    p_pattern = re.compile(r'.*playlist\:*')
     seconds = 0
     t_no = 0
     fps = float(0)
     aspect = 0
     result = None
+    playlist = "00000"
     mainfeature = False
     for line in hb:
 
@@ -270,7 +280,7 @@ def get_track_info(srcpath, job):
             if t_no == 0:
                 pass
             else:
-                utils.put_track(job, t_no, seconds, aspect, fps, mainfeature, "handbrake")
+                utils.put_track(job, t_no, seconds, aspect, fps, playlist, mainfeature, "handbrake")
 
             mainfeature = False
             t_no = line.rsplit(' ', 1)[-1]
@@ -284,10 +294,15 @@ def get_track_info(srcpath, job):
         if(re.search("Main Feature", line)) is not None:
             mainfeature = True
 
+        if(re.search(p_pattern, line)) is not None:
+            p = line.split()
+            p1, p2 = p[2].split('.')
+            p = p1
+
         if(re.search(" fps", line)) is not None:
             fps = line.rsplit(' ', 2)[-2]
             aspect = line.rsplit(' ', 3)[-3]
             aspect = str(aspect).replace(",", "")
 
-    utils.put_track(job, t_no, seconds, aspect, fps, mainfeature, "handbrake")
+    utils.put_track(job, t_no, seconds, aspect, fps, playlist, mainfeature, "handbrake")
 

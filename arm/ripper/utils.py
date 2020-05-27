@@ -389,7 +389,7 @@ def check_db_version(install_path, db_file):
             sys.exit()
 
 
-def put_track(job, t_no, seconds, aspect, fps, mainfeature, source, filename=""):
+def put_track(job, t_no, seconds, aspect, fps, playlist, mainfeature, source, filename=""):
     """
     Put data into a track instance\n
 
@@ -404,7 +404,7 @@ def put_track(job, t_no, seconds, aspect, fps, mainfeature, source, filename="")
     filename = filename of track\n
     """
 
-    logging.debug("Track #" + str(t_no) + " Length: " + str(seconds) + " fps: " + str(fps) + " aspect: " + str(aspect) + " Mainfeature: " +
+    logging.debug("Track #" + str(t_no) + " Length: " + str(seconds) + " fps: " + str(fps) + " aspect: " + str(aspect) + " playlist: " + str(playlist) + " Mainfeature: " +
                   str(mainfeature) + " Source: " + source)
 
     t = Track(
@@ -414,6 +414,7 @@ def put_track(job, t_no, seconds, aspect, fps, mainfeature, source, filename="")
         aspect_ratio=aspect,
         # blocks=b,
         fps=fps,
+        playlist=playlist,
         main_feature=mainfeature,
         source=source,
         basename=job.title,
